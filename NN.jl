@@ -7,6 +7,24 @@ const number_of_middle_layer_node = 4
 sigmoid(s) = 1 / (1 + e^-s)
 update(x, y, t, w) = w - 2ε * x * y * (y - t) * (1 - y)
 
+# データの読み込み
+train = open("train", "r") do io
+    [
+        [
+            parse(Float64, str)
+            for str in split(l, " ")
+        ]
+        for l in readlines(io)
+    ]
+end
+
+test = open("test", "r") do io
+    [
+        parse(Float64, l)
+        for l in readlines(io)
+    ]
+end
+
 # 各層のノード数の配列
 node = vcat([number_of_input_node], fill(number_of_middle_layer_node, number_of_layers - 2), [number_of_output_node])
 
