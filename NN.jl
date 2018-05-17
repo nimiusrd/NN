@@ -31,14 +31,22 @@ node = vcat([number_of_input_node], fill(number_of_middle_layer_node, number_of_
 # 重みのタプル
 ws = ntuple(i -> rand(node[i], node[i + 1]), length(node) - 1)
 
-us = let
+ys = let
     local prev
     ntuple(
         i ->
             if i == 1
                 prev = eye(number_of_input_node)
+                [
+                    sigmoid(sum(prev[i, :]))
+                    for i=1:size(prev)[1]
+                ]
             else
                 prev = ws[i - 1]' * prev
+                [
+                    sigmoid(sum(prev[i, :]))
+                    for i=1:size(prev)[1]
+                ]
             end,
         number_of_layers
     )
