@@ -21,7 +21,10 @@ end
 
 test = open("test", "r") do io
     [
-        parse(Float64, l)
+        [
+            parse(Float64, str)
+            for str in split(l, " ")
+        ]
         for l in readlines(io)
     ]
 end
