@@ -70,10 +70,8 @@ function train(ws, input, test)
     ws
 end
 
-let
-    new_ws = ws
+ws = let
     for i=1:length(x_train)
-        new_ws = train(new_ws, x_train[i], y_train[i])
-        println(new_ws)
+        ws = train(ws, x_train[i], y_train[i])
     end
 end
