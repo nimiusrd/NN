@@ -1,12 +1,15 @@
-const ε = 0.05 # learning late
+const ε = 1 # learning late
 const number_of_input_node = 3
 const number_of_output_node = 1
 const number_of_layers = 3
 const number_of_middle_layer_node = 4
+const lower_limit_of_error = 0.01
+const learning_limit = 200
 
 sigmoid(s) = 1 / (1 + e^-s)
-update_out_layer(x, y, w, t) = w - 2ε * x * y * (1 - y) * (y - t) 
-update_mid_layer(x, y, w, Y) = w - ε * x * Y * (1 - Y) * y 
+calc_out_layer_delta(y, t) = ε * (1 - y) * y * 2 * (y - t) 
+calc_mid_layer_delta(y, ws, delta) = ε * (1 - y) * y * dot(ws, delta)
+loss(y, t) = (y - t).^2
 
 # データの読み込み
 x_train = open("train", "r") do io
@@ -32,7 +35,7 @@ end
 # 各層のノード数の配列
 node = vcat([number_of_input_node], fill(number_of_middle_layer_node, number_of_layers - 2), [number_of_output_node])
 
-# 重みのタプル
+# 重みの初期化
 ws = ntuple(i -> rand(node[i], node[i + 1]), length(node) - 1)
 
 function train(ws, input, test)
@@ -57,21 +60,66 @@ function train(ws, input, test)
         )
     end
 
-    ws = ntuple(i ->
-        reshape([
-            i === length(node) - 1 ? update_out_layer(ys[i][x], ys[i + 1][y], ws[i][x, y], test[Y]) : update_mid_layer(ys[i][x], ys[i + 1][y], ws[i][x, y], ys[length(node)][Y])
-            for x=1:node[i]
-            for y=1:node[i + 1]
-            for Y=1:node[length(node)]
-        ], (node[i], node[i + 1])),
-        length(node) - 1
-    )
-
-    ws
+    ws = let
+        local prev_delta
+        new_ws = ()
+        for i = length(node):-1:2
+            if i === length(node)
+                delta = [
+                    calc_out_layer_delta(ys[i][y], test[y])
+                    for y = 1:node[i]
+                ]
+                new_ws = (
+                    reshape(
+                        [
+                            ws[i - 1][x, y] - delta[y] * ys[i - 1][x]
+                            for x = 1:node[i - 1] 
+                            for y = 1:node[i]
+                        ],
+                        (node[i - 1], node[i])
+                    ),
+                    new_ws...
+                )
+                prev_delta = delta
+            else
+                delta = [
+                    calc_mid_layer_delta(ys[i][y], ws[i][x, :], prev_delta)
+                    for x = 1:node[i]
+                    for y = 1:node[i + 1]
+                ]
+                new_ws = (
+                    reshape(
+                        [
+                            ws[i - 1][x, y] - delta[y] * ys[i - 1][x]
+                            for x = 1:node[i - 1] 
+                            for y = 1:node[i]
+                        ],
+                        (node[i - 1], node[i])
+                    ),
+                    new_ws...
+                )
+                prev_delta = delta
+            end
+        end
+        new_ws
+    end
+    ws, ys[number_of_layers]
 end
 
-ws = let
-    for i=1:length(x_train)
-        ws = train(ws, x_train[i], y_train[i])
+let
+    c = 0
+    err = lower_limit_of_error * length(x_train) + 1
+    while sum(err) / length(x_train) > lower_limit_of_error && learning_limit > c
+        err = zeros(number_of_output_node)
+        ws = let
+            for i=1:length(x_train)
+                ws, y = train(ws, x_train[i], y_train[i])
+                err += loss(y, y_train[i])
+            end
+            ws
+        end
+        c += 1
+        @show c
+        @show err
     end
 end
