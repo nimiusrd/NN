@@ -1,15 +1,35 @@
-const ε = 1 # learning late
+const ε = 0.75 # learning late
 const number_of_input_node = 3
 const number_of_output_node = 1
 const number_of_layers = 3
 const number_of_middle_layer_node = 4
 const lower_limit_of_error = 0.01
-const learning_limit = 200
+const learning_limit = 500
 
 sigmoid(s) = 1 / (1 + e^-s)
 calc_out_layer_delta(y, t) = ε * (1 - y) * y * 2 * (y - t) 
 calc_mid_layer_delta(y, ws, delta) = ε * (1 - y) * y * dot(ws, delta)
 loss(y, t) = (y - t).^2
+function get_ys(ws, input)
+    local prev
+    ntuple(
+        i ->
+            if i === 1
+                prev = eye(number_of_input_node) .* input
+                [
+                    sigmoid(sum(prev[i, :]))
+                    for i=1:size(prev)[1]
+                ]
+            else
+                prev = ws[i - 1]' * prev
+                [
+                    sigmoid(sum(prev[i, :]))
+                    for i=1:size(prev)[1]
+                ]
+            end,
+        number_of_layers
+    )
+end
 
 # データの読み込み
 x_train = open("train", "r") do io
@@ -39,27 +59,7 @@ node = vcat([number_of_input_node], fill(number_of_middle_layer_node, number_of_
 ws = ntuple(i -> rand(node[i], node[i + 1]), length(node) - 1)
 
 function train(ws, input, test)
-    ys = let
-        local prev
-        ntuple(
-            i ->
-                if i === 1
-                    prev = eye(number_of_input_node) .* input
-                    [
-                        sigmoid(sum(prev[i, :]))
-                        for i=1:size(prev)[1]
-                    ]
-                else
-                    prev = ws[i - 1]' * prev
-                    [
-                        sigmoid(sum(prev[i, :]))
-                        for i=1:size(prev)[1]
-                    ]
-                end,
-            number_of_layers
-        )
-    end
-
+    ys = get_ys(ws, input)
     ws = let
         local prev_delta
         new_ws = ()
@@ -80,6 +80,7 @@ function train(ws, input, test)
                     ),
                     new_ws...
                 )
+                @show new_ws
                 prev_delta = delta
             else
                 delta = [
@@ -106,6 +107,11 @@ function train(ws, input, test)
     ws, ys[number_of_layers]
 end
 
+function test(ws, input)
+    ys = get_ys(ws, input)
+    ys[number_of_layers]
+end
+
 let
     c = 0
     err = lower_limit_of_error * length(x_train) + 1
@@ -121,5 +127,22 @@ let
         c += 1
         @show c
         @show err
+    end
+end
+
+let
+    input = open("input", "r") do io
+        [
+            vec([
+                parse(Float64, str)
+                for str in split(l, " ")
+            ])
+            for l in readlines(io)
+        ]
+    end
+    println("input output")
+    for x in input
+        result = test(ws, x)
+        println(x, result)
     end
 end
