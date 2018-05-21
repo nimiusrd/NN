@@ -56,8 +56,13 @@ end
 node = [[number_of_input_node]; fill(number_of_middle_layer_node, number_of_layers - 2); [number_of_output_node]]
 
 # 重みの初期化
-ws = ntuple(i -> rand(node[i], node[i + 1]), length(node) - 1)
-
+ws = ntuple(
+    i -> [
+        rand(node[i], node[i + 1]);
+        [-θ for _ = 1:node[i + 1]]'
+    ],
+    length(node) - 1
+)
 function train(ws, input, test)
     ys = get_ys(ws, input)
     ws = let
