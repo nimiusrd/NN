@@ -59,7 +59,7 @@ node = [[number_of_input_node]; fill(number_of_middle_layer_node, number_of_laye
 ws = ntuple(
     i -> [
         rand(node[i], node[i + 1]);
-        [-θ for _ = 1:node[i + 1]]'
+        fill(-θ, (1, node[i + 1]))
     ],
     length(node) - 1
 )
