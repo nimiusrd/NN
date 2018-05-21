@@ -16,10 +16,7 @@ function get_ys(ws, input)
         i ->
             if i === 1
                 prev = eye(number_of_input_node + 1) .* [input; 1]
-                [
-                    sigmoid(sum(prev[i, :]))
-                    for i=1:size(prev)[1]
-                ]
+                [input; 1]
             else
                 prev = ws[i - 1]' * prev
                 [
