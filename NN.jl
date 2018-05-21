@@ -8,7 +8,11 @@ const learning_limit = 500
 
 sigmoid(s) = 1 / (1 + e^-s)
 calc_out_layer_delta(y, t) = ε * (1 - y) * y * 2 * (y - t) 
-calc_mid_layer_delta(y, ws, delta) = ε * (1 - y) * y * dot(ws, delta)
+function calc_mid_layer_delta(y, ws, delta)
+    @show ws
+    @show delta
+    ε * (1 - y) * y * dot(ws, delta)
+end
 loss(y, t) = (y - t).^2
 function get_ys(ws, input)
     local prev
@@ -16,7 +20,7 @@ function get_ys(ws, input)
         i ->
             if i === 1
                 prev = eye(number_of_input_node) .* input
-                [input; 1]
+                [input; -θ]
             elseif i === number_of_layers
                 prev = ws[i - 1]' * prev
                 [
@@ -30,7 +34,7 @@ function get_ys(ws, input)
                         sigmoid(sum(prev[i, :]))
                         for i=1:size(prev)[1]
                     ];
-                    [1]
+                    [-θ]
                 ]
             end,
         number_of_layers
