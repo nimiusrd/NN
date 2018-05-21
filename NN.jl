@@ -1,9 +1,9 @@
 const ε = 0.75 # learning late
+const θ = 0.01 # error limit
 const number_of_input_node = 3
 const number_of_output_node = 1
 const number_of_layers = 3
 const number_of_middle_layer_node = 4
-const lower_limit_of_error = 0.01
 const learning_limit = 500
 
 sigmoid(s) = 1 / (1 + e^-s)
@@ -113,8 +113,8 @@ end
 
 let
     c = 0
-    err = lower_limit_of_error * length(x_train) + 1
-    while sum(err) / length(x_train) > lower_limit_of_error && learning_limit > c
+    err = θ * length(x_train) + 1
+    while sum(err) / length(x_train) > θ && learning_limit > c
         err = zeros(number_of_output_node)
         ws = let
             for i=1:length(x_train)
