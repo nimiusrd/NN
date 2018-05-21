@@ -15,13 +15,22 @@ function get_ys(ws, input)
     ntuple(
         i ->
             if i === 1
-                prev = eye(number_of_input_node + 1) .* [input; 1]
+                prev = eye(number_of_input_node) .* input
                 [input; 1]
-            else
+            elseif i === number_of_layers
                 prev = ws[i - 1]' * prev
                 [
                     sigmoid(sum(prev[i, :]))
                     for i=1:size(prev)[1]
+                ]
+            else
+                prev = ws[i - 1]' * prev
+                [
+                    [
+                        sigmoid(sum(prev[i, :]))
+                        for i=1:size(prev)[1]
+                    ];
+                    [1]
                 ]
             end,
         number_of_layers
@@ -54,10 +63,7 @@ node = [[number_of_input_node]; fill(number_of_middle_layer_node, number_of_laye
 
 # 重みの初期化
 ws = ntuple(
-    i -> [
-        rand(node[i], node[i + 1]);
-        fill(-θ, (1, node[i + 1]))
-    ],
+    i -> rand(node[i], node[i + 1]),
     length(node) - 1
 )
 function train(ws, input, test)
