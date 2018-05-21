@@ -15,7 +15,7 @@ function get_ys(ws, input)
     ntuple(
         i ->
             if i === 1
-                prev = eye(number_of_input_node) .* input
+                prev = eye(number_of_input_node + 1) .* [input; 1]
                 [
                     sigmoid(sum(prev[i, :]))
                     for i=1:size(prev)[1]
