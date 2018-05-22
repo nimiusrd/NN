@@ -3,8 +3,8 @@ const number_of_input_node = 3
 const number_of_output_node = 1
 const number_of_layers = 3
 const number_of_middle_layer_node = 4
-const learning_limit = 1500
-const error_limit = 0.01
+const learning_limit = 10000
+const error_limit = 0.001
 const node = [[number_of_input_node + 1]; fill(number_of_middle_layer_node + 1, number_of_layers - 2); [number_of_output_node]]
 
 sigmoid = θ -> s -> 1 / (1 + e^-(s - θ))
@@ -17,6 +17,7 @@ function get_ys(ws, input)
         i ->
             if i === 1
                 prev = input
+                [prev; 1]
             elseif i === number_of_layers
                 prev = ws[i - 1]' * [prev; 1]
                 prev = [
@@ -29,6 +30,7 @@ function get_ys(ws, input)
                     sigmoid(ws[i - 1][node[i - 1], s])(prev[s])
                     for s = 1:node[i] - 1
                 ]
+                [prev; 1]
             end,
         number_of_layers
     )
@@ -36,12 +38,11 @@ end
 
 function train(ws, input, test)
     ys = get_ys(ws, input)
-    @show ys
     ws = let
         local prev_delta
         new_ws = ()
-        for i = length(node):-1:2
-            if i === length(node)
+        for i = number_of_layers:-1:2
+            if i === number_of_layers
                 delta = [
                     calc_out_layer_delta(ys[i][y], test[y])
                     for y = 1:node[i]
@@ -69,9 +70,9 @@ function train(ws, input, test)
                         [
                             ws[i - 1][x, y] - delta[y] * ys[i - 1][x]
                             for x = 1:node[i - 1] 
-                            for y = 1:node[i]
+                            for y = 1:node[i] - 1
                         ],
-                        (node[i - 1], node[i])
+                        (node[i - 1], node[i] - 1)
                     ),
                     new_ws...
                 )
@@ -119,7 +120,6 @@ ws = ntuple(
         end,
     length(node) - 1
 )
-@show ws
 
 let
     c = 0
