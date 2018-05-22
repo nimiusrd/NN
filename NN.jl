@@ -1,13 +1,13 @@
 const ε = 0.75 # learning late
-const θ = 0.01 # error limit
 const number_of_input_node = 3
 const number_of_output_node = 1
 const number_of_layers = 3
 const number_of_middle_layer_node = 4
-const learning_limit = 500
-const node = [[number_of_input_node]; fill(number_of_middle_layer_node, number_of_layers - 2); [number_of_output_node]]
+const learning_limit = 1500
+const error_limit = 0.01
+const node = [[number_of_input_node + 1]; fill(number_of_middle_layer_node + 1, number_of_layers - 2); [number_of_output_node]]
 
-sigmoid(s) = 1 / (1 + e^-s)
+sigmoid = θ -> s -> 1 / (1 + e^-(s - θ))
 calc_out_layer_delta(y, t) = ε * (1 - y) * y * 2 * (y - t) 
 calc_mid_layer_delta(y, ws, delta) = ε * (1 - y) * y * dot(ws, delta)
 loss(y, t) = (y - t).^2
@@ -16,20 +16,19 @@ function get_ys(ws, input)
     ntuple(
         i ->
             if i === 1
-                prev = map(
-                    sigmoid,
-                    input
-                )
+                prev = input
             elseif i === number_of_layers
-                prev = map(
-                    sigmoid,
-                    [ws[i - 1]; fill(-θ, (1, node[i]))]' * [prev; 1]
-                )
+                prev = ws[i - 1]' * [prev; 1]
+                prev = [
+                    sigmoid(ws[i - 1][node[i - 1], s])(prev[s])
+                    for s = 1:node[i]
+                ]
             else
-                prev = map(
-                    sigmoid,
-                    [ws[i - 1]; fill(-θ, (1, node[i]))]' * [prev; 1]
-                )
+                prev = ws[i - 1]' * [prev; 1]
+                prev = [
+                    sigmoid(ws[i - 1][node[i - 1], s])(prev[s])
+                    for s = 1:node[i] - 1
+                ]
             end,
         number_of_layers
     )
@@ -37,6 +36,7 @@ end
 
 function train(ws, input, test)
     ys = get_ys(ws, input)
+    @show ys
     ws = let
         local prev_delta
         new_ws = ()
@@ -111,14 +111,20 @@ end
 
 # 重みの初期化
 ws = ntuple(
-    i -> rand(node[i], node[i + 1]),
+    i ->
+        if i === length(node) - 1
+            rand(node[i], node[i + 1])
+        else
+            rand(node[i], node[i + 1] - 1)
+        end,
     length(node) - 1
 )
+@show ws
 
 let
     c = 0
-    err = θ * length(x_train) + 1
-    while sum(err) / length(x_train) > θ && learning_limit > c
+    err = error_limit * length(x_train) + 1
+    while sum(err) / length(x_train) > error_limit && learning_limit > c
         err = zeros(number_of_output_node)
         ws = let
             for i=1:length(x_train)
