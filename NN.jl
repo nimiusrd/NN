@@ -35,7 +35,6 @@ function get_ys(ws, input)
         number_of_layers
     )
 end
-
 function train(ws, input, test)
     ys = get_ys(ws, input)
     ws = let
@@ -83,7 +82,6 @@ function train(ws, input, test)
     end
     ws, ys[number_of_layers]
 end
-
 function test(ws, input)
     ys = get_ys(ws, input)
     ys[number_of_layers]
@@ -135,7 +133,7 @@ let
         end
         c += 1
         @show c
-        @show err
+        @show err / length(x_train)
     end
 end
 
