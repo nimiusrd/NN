@@ -114,24 +114,24 @@ let
         NUMBER_OF_LAYERS - 1
     )
 
-    let
-        c = 0
-        err = ERROR_LIMIT * length(x_train) + 1
-        while sum(err) / length(x_train) > ERROR_LIMIT && LEARNING_LIMIT > c
-            err = zeros(NUMBER_OF_OUTPUT_NODE)
-            ws = let
-                for i=1:length(x_train)
-                    ws, y = train(ws, x_train[i], y_train[i])
-                    err += loss(y, y_train[i])
-                end
-                ws
+    # 学習
+    c = 0
+    err = ERROR_LIMIT * length(x_train) + 1
+    while sum(err) / length(x_train) > ERROR_LIMIT && LEARNING_LIMIT > c
+        err = zeros(NUMBER_OF_OUTPUT_NODE)
+        ws = let
+            for i=1:length(x_train)
+                ws, y = train(ws, x_train[i], y_train[i])
+                err += loss(y, y_train[i])
             end
-            c += 1
-            @show c
-            @show err / length(x_train)
+            ws
         end
+        c += 1
+        @show c
+        @show err / length(x_train)
     end
 
+    # テスト
     input = read_data("input")
     println("input output")
     for x in input
