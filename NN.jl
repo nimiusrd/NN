@@ -11,6 +11,17 @@ sigmoid = θ -> s -> 1 / (1 + e^-(s - θ))
 calc_out_layer_delta(y, t) = ε * (1 - y) * y * 2 * (y - t) 
 calc_mid_layer_delta(y, ws, delta) = ε * (1 - y) * y * dot(ws, delta)
 loss(y, t) = (y - t).^2
+function read_data(filename)
+    open(filename, "r") do io
+        [
+            vec([
+                parse(Float64, str)
+                for str in split(l, " ")
+            ])
+            for l in readlines(io)
+        ]
+    end
+end
 function get_ys(ws, input)
     local prev
     ntuple(
@@ -89,25 +100,8 @@ end
 
 let
     # データの読み込み
-    x_train = open("train", "r") do io
-        [
-            vec([
-                parse(Float64, str)
-                for str in split(l, " ")
-            ])
-            for l in readlines(io)
-        ]
-    end
-
-    y_train = open("test", "r") do io
-        [
-            vec([
-                parse(Float64, str)
-                for str in split(l, " ")
-            ])
-            for l in readlines(io)
-        ]
-    end
+    x_train = read_data("train")
+    y_train = read_data("test")
 
     # 重みの初期化
     ws = ntuple(
@@ -138,15 +132,7 @@ let
         end
     end
 
-    input = open("input", "r") do io
-        [
-            vec([
-                parse(Float64, str)
-                for str in split(l, " ")
-            ])
-            for l in readlines(io)
-        ]
-    end
+    input = read_data("input")
     println("input output")
     for x in input
         result = test(ws, x)
