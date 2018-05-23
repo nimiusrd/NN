@@ -87,57 +87,57 @@ function test(ws, input)
     ys[number_of_layers]
 end
 
-# データの読み込み
-x_train = open("train", "r") do io
-    [
-        vec([
-            parse(Float64, str)
-            for str in split(l, " ")
-        ])
-        for l in readlines(io)
-    ]
-end
-
-y_train = open("test", "r") do io
-    [
-        vec([
-            parse(Float64, str)
-            for str in split(l, " ")
-        ])
-        for l in readlines(io)
-    ]
-end
-
-# 重みの初期化
-ws = ntuple(
-    i ->
-        if i === length(node) - 1
-            rand(node[i], node[i + 1])
-        else
-            rand(node[i], node[i + 1] - 1)
-        end,
-    length(node) - 1
-)
-
 let
-    c = 0
-    err = error_limit * length(x_train) + 1
-    while sum(err) / length(x_train) > error_limit && learning_limit > c
-        err = zeros(number_of_output_node)
-        ws = let
-            for i=1:length(x_train)
-                ws, y = train(ws, x_train[i], y_train[i])
-                err += loss(y, y_train[i])
-            end
-            ws
-        end
-        c += 1
-        @show c
-        @show err / length(x_train)
+    # データの読み込み
+    x_train = open("train", "r") do io
+        [
+            vec([
+                parse(Float64, str)
+                for str in split(l, " ")
+            ])
+            for l in readlines(io)
+        ]
     end
-end
 
-let
+    y_train = open("test", "r") do io
+        [
+            vec([
+                parse(Float64, str)
+                for str in split(l, " ")
+            ])
+            for l in readlines(io)
+        ]
+    end
+
+    # 重みの初期化
+    ws = ntuple(
+        i ->
+            if i === length(node) - 1
+                rand(node[i], node[i + 1])
+            else
+                rand(node[i], node[i + 1] - 1)
+            end,
+        length(node) - 1
+    )
+
+    let
+        c = 0
+        err = error_limit * length(x_train) + 1
+        while sum(err) / length(x_train) > error_limit && learning_limit > c
+            err = zeros(number_of_output_node)
+            ws = let
+                for i=1:length(x_train)
+                    ws, y = train(ws, x_train[i], y_train[i])
+                    err += loss(y, y_train[i])
+                end
+                ws
+            end
+            c += 1
+            @show c
+            @show err / length(x_train)
+        end
+    end
+
     input = open("input", "r") do io
         [
             vec([
