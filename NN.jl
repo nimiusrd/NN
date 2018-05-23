@@ -1,12 +1,12 @@
 const ε = 0.75 # 学習率
-const number_of_input_node = 3 # 入力層のノード数
-const number_of_output_node = 1 # 出力層のノード数
-const number_of_layers = 3 # 層数
-const number_of_middle_layer_node = 4 # 中間層のノード数
-const learning_limit = 10000 # 最大学習数
-const error_limit = 0.001 # 許容する誤差の上限
+const NUMBER_OF_INPUT_NODE = 3 # 入力層のノード数
+const NUMBER_OF_OUTPUT_NODE = 1 # 出力層のノード数
+const NUMBER_OF_LAYERS = 3 # 層数
+const NUMBER_OF_MIDDLE_LAYER_NODE = 4 # 中間層のノード数
+const LEARNING_LIMIT = 10000 # 最大学習数
+const ERROR_LIMIT = 0.001 # 許容する誤差の上限
 
-const node = [[number_of_input_node + 1]; fill(number_of_middle_layer_node + 1, number_of_layers - 2); [number_of_output_node]]
+const node = [[NUMBER_OF_INPUT_NODE + 1]; fill(NUMBER_OF_MIDDLE_LAYER_NODE + 1, NUMBER_OF_LAYERS - 2); [NUMBER_OF_OUTPUT_NODE]]
 sigmoid = θ -> s -> 1 / (1 + e^-(s - θ))
 calc_out_layer_delta(y, t) = ε * (1 - y) * y * 2 * (y - t) 
 calc_mid_layer_delta(y, ws, delta) = ε * (1 - y) * y * dot(ws, delta)
@@ -29,7 +29,7 @@ function get_ys(ws, input)
             if i === 1
                 prev = input
                 [prev; 1]
-            elseif i === number_of_layers
+            elseif i === NUMBER_OF_LAYERS
                 prev = ws[i - 1]' * [prev; 1]
                 prev = [
                     sigmoid(ws[i - 1][node[i - 1], s])(prev[s])
@@ -43,7 +43,7 @@ function get_ys(ws, input)
                 ]
                 [prev; 1]
             end,
-        number_of_layers
+        NUMBER_OF_LAYERS
     )
 end
 function train(ws, input, test)
@@ -51,8 +51,8 @@ function train(ws, input, test)
     ws = let
         local prev_delta
         new_ws = ()
-        for i = number_of_layers:-1:2
-            if i === number_of_layers
+        for i = NUMBER_OF_LAYERS:-1:2
+            if i === NUMBER_OF_LAYERS
                 delta = [
                     calc_out_layer_delta(ys[i][y], test[y])
                     for y = 1:node[i]
@@ -91,11 +91,11 @@ function train(ws, input, test)
         end
         new_ws
     end
-    ws, ys[number_of_layers]
+    ws, ys[NUMBER_OF_LAYERS]
 end
 function test(ws, input)
     ys = get_ys(ws, input)
-    ys[number_of_layers]
+    ys[NUMBER_OF_LAYERS]
 end
 
 let
@@ -106,19 +106,19 @@ let
     # 重みの初期化
     ws = ntuple(
         i ->
-            if i === number_of_layers - 1
+            if i === NUMBER_OF_LAYERS - 1
                 rand(node[i], node[i + 1])
             else
                 rand(node[i], node[i + 1] - 1)
             end,
-        number_of_layers - 1
+        NUMBER_OF_LAYERS - 1
     )
 
     let
         c = 0
-        err = error_limit * length(x_train) + 1
-        while sum(err) / length(x_train) > error_limit && learning_limit > c
-            err = zeros(number_of_output_node)
+        err = ERROR_LIMIT * length(x_train) + 1
+        while sum(err) / length(x_train) > ERROR_LIMIT && LEARNING_LIMIT > c
+            err = zeros(NUMBER_OF_OUTPUT_NODE)
             ws = let
                 for i=1:length(x_train)
                     ws, y = train(ws, x_train[i], y_train[i])
