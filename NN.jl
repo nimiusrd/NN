@@ -1,12 +1,12 @@
-const ε = 0.75 # learning late
-const number_of_input_node = 3
-const number_of_output_node = 1
-const number_of_layers = 3
-const number_of_middle_layer_node = 4
-const learning_limit = 10000
-const error_limit = 0.001
-const node = [[number_of_input_node + 1]; fill(number_of_middle_layer_node + 1, number_of_layers - 2); [number_of_output_node]]
+const ε = 0.75 # 学習率
+const number_of_input_node = 3 # 入力層のノード数
+const number_of_output_node = 1 # 出力層のノード数
+const number_of_layers = 3 # 層数
+const number_of_middle_layer_node = 4 # 中間層のノード数
+const learning_limit = 10000 # 最大学習数
+const error_limit = 0.001 # 許容する誤差の上限
 
+const node = [[number_of_input_node + 1]; fill(number_of_middle_layer_node + 1, number_of_layers - 2); [number_of_output_node]]
 sigmoid = θ -> s -> 1 / (1 + e^-(s - θ))
 calc_out_layer_delta(y, t) = ε * (1 - y) * y * 2 * (y - t) 
 calc_mid_layer_delta(y, ws, delta) = ε * (1 - y) * y * dot(ws, delta)
