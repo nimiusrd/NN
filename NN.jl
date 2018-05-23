@@ -1,8 +1,8 @@
-const ε = 0.75 # 学習率
 const NUMBER_OF_INPUT_NODE = 3 # 入力層のノード数
 const NUMBER_OF_OUTPUT_NODE = 1 # 出力層のノード数
-const NUMBER_OF_LAYERS = 3 # 層数
 const NUMBER_OF_MIDDLE_LAYER_NODE = 4 # 中間層のノード数
+const NUMBER_OF_LAYERS = 3 # 層数
+const ε = 0.75 # 学習率
 const LEARNING_LIMIT = 10000 # 最大学習数
 const ERROR_LIMIT = 0.001 # 許容する誤差の上限
 
