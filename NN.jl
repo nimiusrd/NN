@@ -106,12 +106,12 @@ let
     # 重みの初期化
     ws = ntuple(
         i ->
-            if i === length(node) - 1
+            if i === number_of_layers - 1
                 rand(node[i], node[i + 1])
             else
                 rand(node[i], node[i + 1] - 1)
             end,
-        length(node) - 1
+        number_of_layers - 1
     )
 
     let
